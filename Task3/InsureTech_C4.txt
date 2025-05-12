@@ -1,0 +1,46 @@
+@startuml
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!includeurl C4P/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+Person(client, "Клиент", "Пользователь страхового веб-приложения")
+
+System_Boundary(insuretech, "InsureTech System") {
+
+  Container(web, "InsureTech Web", "React", "Веб-приложение для клиентов")
+  Container(coreApp, "core-app", "Kotlin + Spring Boot", "Монолитное backend-приложение: оформление, отображение продуктов, заявки")
+  Container(coreDB, "core-db", "PostgreSQL", "Хранение тарифов и заявок")
+  Container(clientInfo, "client-info", "Kotlin + Spring Boot", "Сервис управления клиентскими данными")
+  Container(clientInfoDB, "client-info-db", "PostgreSQL", "Хранение клиентских данных")
+  Container(aggregator, "ins-product-aggregator", "Kotlin + Spring Boot", "Агрегатор тарифов от страховых компаний")
+  Container(settlement, "ins-comp-settlement", "Kotlin + Spring Boot", "Сервис взаиморасчётов со страховыми")
+  Container(settlementDB, "ins-comp-settlement-db", "PostgreSQL", "Хранение взаиморасчетов и оформленных страховок")
+  Container(kafka, "Kafka", "Event Streaming", "Передача событий между сервисами")
+  Container(outbox, "Transactional Outbox", "Встроено в core-app", "Гарантированная публикация событий о страховках")
+
+}
+
+System_Ext(insuranceAPI, "Системы страховых компаний", "API страховых компаний")
+System_Ext(payment, "Платёжный сервис", "Проведение оплат")
+System_Ext(partners, "Системы партнёров", "Интеграция страховых продуктов через внешние платформы")
+
+Rel(client, web, "Использует")
+Rel(web, clientInfo, "REST: получение/обновление клиентских данных")
+Rel(web, coreApp, "REST: получение продуктов, оформление заявок")
+Rel(web, payment, "HTTP: редирект на оплату")
+Rel(coreApp, clientInfo, "REST: получение/обновление данных клиента")
+Rel(coreApp, coreDB, "TCP", "Доступ к данным")
+Rel(coreApp, payment, "HTTP: редирект на оплату")
+Rel(coreApp, outbox, "Пишет события InsuranceIssued")
+Rel(outbox, kafka, "Отправка событий")
+Rel(kafka, settlement, "Получает InsuranceIssued")
+Rel(kafka, coreApp, "Получает ProductTariffUpdated")
+Rel(kafka, settlement, "Получает ProductTariffUpdated")
+Rel(aggregator, kafka, "Публикует ProductTariffUpdated")
+Rel(aggregator, insuranceAPI, "REST/SOAP/GraphQL: получение тарифов")
+Rel(settlement, settlementDB, "TCP", "Хранение взаиморасчетов")
+Rel(settlement, insuranceAPI, "REST/SOAP/GraphQL: отчёты по оформленным полисам")
+Rel(clientInfo, clientInfoDB, "TCP", "Хранение клиентских данных")
+Rel(partners, coreApp, "REST: интеграция по оформлению страховок")
+
+@enduml
