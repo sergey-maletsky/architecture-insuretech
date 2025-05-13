@@ -51,10 +51,10 @@ Rel(kafka, settlement, "Получает InsuranceIssued")
 Rel(kafka, coreApp, "Получает ProductTariffUpdated")
 Rel(kafka, settlement, "Получает ProductTariffUpdated")
 Rel(aggregator, kafka, "Публикует ProductTariffUpdated")
-Rel(aggregator, insuranceAPI, "REST/SOAP/GraphQL: получение тарифов")
+Rel(aggregator, insuranceAPI, "REST/SOAP/GraphQL: получение тарифов\n[Timeout, Retry, Circuit Breaker, Rate Limiting]")
 
 Rel(settlement, settlementDB, "TCP", "Хранение взаиморасчетов")
-Rel(settlement, insuranceAPI, "REST/SOAP/GraphQL: отчёты по оформленным полисам")
+Rel(settlement, insuranceAPI, "REST/SOAP/GraphQL: отчёты по оформленным полисам\n[Timeout, Retry, Circuit Breaker, Rate Limiting]")
 
 Rel(clientInfo, clientInfoDB, "TCP", "Хранение клиентских данных")
 Rel(partners, coreApp, "REST: интеграция по оформлению страховок")
@@ -63,7 +63,7 @@ Rel(partners, coreApp, "REST: интеграция по оформлению с�
 Rel(coreApp, osagoAggregator, "REST: передача заявки и получение предложений")
 Rel(osagoAggregator, kafka, "Публикует OsagoRequestCreated")
 Rel(osagoAggregator, osagoDB, "TCP", "Хранение заявок и результатов")
-Rel(osagoAggregator, insuranceAPI, "REST: create & poll offer from страховые")
+Rel(osagoAggregator, insuranceAPI, "REST: create & poll offer from страховые\n[Timeout, Retry, Circuit Breaker, Rate Limiting]")
 Rel(osagoAggregator, coreApp, "WebSocket/REST: передача предложений по мере поступления")
 
 @enduml
